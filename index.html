@@ -1,648 +1,424 @@
+<!-- index.html -->
 <!doctype html>
 <html lang="id">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dokumentasi Docker Stack - RFID Tracking & Garment Backend</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    /* Smooth anchors */
-    html {
-      scroll-behavior: smooth;
-    }
-
-    /* Nicer code blocks */
-    pre code {
-      display: block;
-    }
-  </style>
+  <title>Docker Stack Ops Guide (Simple & Advanced)</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 
-<body class="bg-slate-950 text-slate-100">
-  <!-- Top bar -->
-  <header class="sticky top-0 z-50 backdrop-blur bg-slate-950/70 border-b border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-cyan-400 to-indigo-500"></div>
-        <div>
-          <div class="font-semibold leading-tight">Docker Stack Documentation</div>
-          <div class="text-xs text-slate-400">RFID Tracking v2 + Garment Backend (Django/Channels) + Infra</div>
-        </div>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <div class="title">Docker Stack Ops Guide</div>
+        <div class="subtitle">Mode Simpel + Mode Komplek (RFID Tracking & Garment Backend)</div>
       </div>
-      <nav class="hidden md:flex gap-4 text-sm text-slate-300">
-        <a href="#overview" class="hover:text-white">Overview</a>
-        <a href="#services" class="hover:text-white">Services</a>
-        <a href="#startstop" class="hover:text-white">Start/Stop</a>
-        <a href="#verify" class="hover:text-white">Verifikasi</a>
-        <a href="#troubleshoot" class="hover:text-white">Troubleshooting</a>
-        <a href="#cleanup" class="hover:text-white">Cleanup</a>
-      </nav>
-      <a href="#quickstart"
-        class="text-sm px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">
-        Quick Start
-      </a>
+    </div>
+
+    <div class="actions">
+      <div class="pill" id="stackStatusPill">Status: <span id="statusText">manual</span></div>
+      <button class="btn" id="toggleThemeBtn" type="button">Tema: Terang</button>
     </div>
   </header>
 
-  <!-- Hero -->
-  <section class="max-w-7xl mx-auto px-4 pt-10 pb-8">
-    <div class="grid lg:grid-cols-3 gap-6 items-start">
-      <div class="lg:col-span-2">
-        <h1 class="text-3xl md:text-4xl font-bold">
-          Dokumentasi Operasional Server
-          <span class="block text-slate-300 text-xl mt-2">RFID Tracking v2, Proxy API, Django Backend, MySQL, Redis,
-            Mosquitto</span>
-        </h1>
-        <p class="text-slate-300 mt-4 leading-relaxed">
-          Dokumen ini dibuat untuk jadi pegangan saat server restart, pindah mesin, atau troubleshooting.
-          Fokusnya bukan teori kosong, tapi langkah nyata: start stack, cek sehat, pahami istilah,
-          dan cara menangani error yang sering muncul (Redis refused, MySQL denied, Mosquitto config, proxy timeout).
-        </p>
-
-        <div class="mt-6 flex flex-wrap gap-3">
-          <span
-            class="px-3 py-1 rounded-full bg-emerald-900/40 border border-emerald-700 text-emerald-200 text-sm">Compose-driven</span>
-          <span class="px-3 py-1 rounded-full bg-indigo-900/40 border border-indigo-700 text-indigo-200 text-sm">Django
-            Channels + Redis</span>
-          <span class="px-3 py-1 rounded-full bg-cyan-900/40 border border-cyan-700 text-cyan-200 text-sm">Proxy Node
-            API</span>
-          <span class="px-3 py-1 rounded-full bg-amber-900/40 border border-amber-700 text-amber-200 text-sm">MQTT
-            Mosquitto</span>
-        </div>
+  <main class="wrap">
+    <section class="toolbar">
+      <div class="tabs" role="tablist" aria-label="Mode">
+        <button class="tab active" role="tab" aria-selected="true" data-tab="simple">Mode Simpel</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="advanced">Mode Komplek</button>
       </div>
 
-      <div class="lg:col-span-1">
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-5">
-          <div class="text-sm text-slate-300">Snapshot stack saat ini</div>
-          <div class="mt-3 grid gap-2 text-sm">
-            <div class="flex justify-between"><span class="text-slate-400">Frontend</span><span
-                class="font-mono">:5173</span></div>
-            <div class="flex justify-between"><span class="text-slate-400">Proxy API</span><span
-                class="font-mono">:8000</span></div>
-            <div class="flex justify-between"><span class="text-slate-400">Backend Django</span><span
-                class="font-mono">:7000</span></div>
-            <div class="flex justify-between"><span class="text-slate-400">MySQL</span><span
-                class="font-mono">:3306</span></div>
-            <div class="flex justify-between"><span class="text-slate-400">Redis</span><span
-                class="font-mono">:6379</span></div>
-            <div class="flex justify-between"><span class="text-slate-400">Mosquitto</span><span class="font-mono">:1883
-                / :9001</span></div>
-          </div>
-          <div class="mt-4 text-xs text-slate-500">
-            Tips: Endpoint backend tertentu butuh API key, jadi kalau akses langsung tanpa header akan 403 (normal).
-          </div>
+      <div class="search">
+        <input id="searchInput" type="search"
+          placeholder="Cari: container, port, error (timeout, denied, refused), perintah..." />
+        <button class="btn ghost" id="clearSearchBtn" type="button">Clear</button>
+      </div>
+    </section>
+
+    <!-- CONFIG -->
+    <section class="card" id="configCard">
+      <div class="cardHead">
+        <h2>Konfigurasi Cepat (sesuaikan bila nama beda)</h2>
+        <p class="muted">Ini dipakai untuk contoh perintah. Kalau nama container kamu berbeda, ubah di sini.</p>
+      </div>
+
+      <div class="grid2">
+        <div class="kv">
+          <div class="k">Folder compose</div>
+          <div class="v"><code>/home/robotics/docker-stack</code></div>
+        </div>
+        <div class="kv">
+          <div class="k">Compose file</div>
+          <div class="v"><code>docker-compose.yml</code></div>
+        </div>
+        <div class="kv">
+          <div class="k">IP host (LAN)</div>
+          <div class="v"><code>10.5.3.195</code></div>
+        </div>
+        <div class="kv">
+          <div class="k">Network</div>
+          <div class="v"><code>nwr-net</code></div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Layout -->
-  <main class="max-w-7xl mx-auto px-4 pb-16">
-    <div class="grid lg:grid-cols-12 gap-6">
-      <!-- Side nav -->
-      <aside class="lg:col-span-3">
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-4 sticky top-20">
-          <div class="text-xs uppercase tracking-wider text-slate-400">Daftar isi</div>
-          <div class="mt-3 grid gap-2 text-sm">
-            <a class="px-3 py-2 rounded-lg hover:bg-slate-800" href="#quickstart">Quick Start</a>
-            <a class="px-3 py-2 rounded-lg hover:bg-slate-800" href="#overview">1. Overview</a>
-            <a class="px-3 py-2 rounded-lg hover:bg-slate-800" href="#terms">2. Istilah & Komponen</a>
-            <a class="px-3 py-2 rounded-lg hover:bg-slate-800" href="#services">3. Daftar Service</a>
-            <a class="px-3 py-2 rounded-lg hover:bg-slate-800" href="#startstop">4. Start/Stop/Restart</a>
-            <a class="px-3 py-2 rounded-lg hover:bg-slate-800" href="#verify">5. Verifikasi Menyeluruh</a>
-            <a class="px-3 py-2 rounded-lg hover:bg-slate-800" href="#troubleshoot">6. Troubleshooting</a>
-            <a class="px-3 py-2 rounded-lg hover:bg-slate-800" href="#cleanup">7. Cleanup Images/Volumes</a>
-            <a class="px-3 py-2 rounded-lg hover:bg-slate-800" href="#security">8. Catatan Keamanan</a>
+    <!-- SIMPLE MODE -->
+    <section class="panel show" id="tab-simple" data-panel="simple">
+      <section class="card">
+        <div class="cardHead">
+          <h2>Mode Simpel: Restart cepat (paling sering dipakai)</h2>
+          <p class="muted">
+            Target: server habis reboot, atau aplikasi terasa “ngadat”.
+            Fokus: nyalain semua, cek cepat, selesai.
+          </p>
+        </div>
+
+        <div class="step">
+          <div class="stepNo">1</div>
+          <div class="stepBody">
+            <div class="stepTitle">Start / Rebuild stack (normal)</div>
+            <p class="muted">Kalau ada perubahan code/image, pakai <code>--build</code>.</p>
+            <div class="cmd">
+              <div class="cmdTop">
+                <span>Terminal</span>
+                <button class="copy" data-copy>Copy</button>
+              </div>
+              <pre><code>cd ~/docker-stack
+sudo docker compose up -d --build</code></pre>
+            </div>
           </div>
         </div>
-      </aside>
 
-      <!-- Content -->
-      <section class="lg:col-span-9 space-y-10">
+        <div class="step">
+          <div class="stepNo">2</div>
+          <div class="stepBody">
+            <div class="stepTitle">Cek container up dan port terbuka</div>
+            <div class="cmd">
+              <div class="cmdTop">
+                <span>Terminal</span>
+                <button class="copy" data-copy>Copy</button>
+              </div>
+              <pre><code>sudo docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"</code></pre>
+            </div>
+            <p class="muted">Wajib terlihat: <code>rfid-frontend</code> 5173, <code>rfid-proxy</code> 8000,
+              <code>django-gm1</code> 7000.</p>
+          </div>
+        </div>
 
-        <!-- Quickstart -->
-        <section id="quickstart" class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
-          <h2 class="text-2xl font-semibold">Quick Start (paling sering dipakai)</h2>
-          <p class="text-slate-300 mt-2">
-            Ini langkah singkat ketika server habis reboot atau kamu mau jalankan semuanya dari nol menggunakan docker
-            compose.
-          </p>
+        <div class="step">
+          <div class="stepNo">3</div>
+          <div class="stepBody">
+            <div class="stepTitle">Smoke test endpoint (3 detik)</div>
+            <div class="cmd">
+              <div class="cmdTop">
+                <span>Terminal</span>
+                <button class="copy" data-copy>Copy</button>
+              </div>
+              <pre><code>curl -m 3 -I http://10.5.3.195:5173 | head
+curl -m 3 -I http://10.5.3.195:8000 | head
+curl -m 3 -sS http://10.5.3.195:8000/wira | head</code></pre>
+            </div>
+            <div class="note ok">
+              <strong>Normal:</strong> akses <code>http://10.5.3.195:7000/wira</code> langsung bisa 403 karena butuh API
+              key, tapi via proxy <code>:8000</code> harus 200.
+            </div>
+          </div>
+        </div>
 
-          <div class="mt-4 grid md:grid-cols-2 gap-4">
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="text-sm font-semibold text-slate-200">1) Jalankan stack</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-cd ~/docker-stack
-sudo docker compose up -d --build
-              </code></pre>
-              <div class="text-xs text-slate-400 mt-2">
-                <span class="text-slate-200">--build</span> dipakai kalau ada perubahan kode/image.
+        <div class="step">
+          <div class="stepNo">4</div>
+          <div class="stepBody">
+            <div class="stepTitle">Restart satu service saja (kalau error spesifik)</div>
+            <div class="grid2">
+              <div class="cmd">
+                <div class="cmdTop"><span>Restart proxy</span><button class="copy" data-copy>Copy</button></div>
+                <pre><code>cd ~/docker-stack
+sudo docker compose up -d --no-deps --force-recreate proxy</code></pre>
+              </div>
+              <div class="cmd">
+                <div class="cmdTop"><span>Restart backend</span><button class="copy" data-copy>Copy</button></div>
+                <pre><code>sudo docker restart django-gm1</code></pre>
+              </div>
+              <div class="cmd">
+                <div class="cmdTop"><span>Restart mysql</span><button class="copy" data-copy>Copy</button></div>
+                <pre><code>sudo docker restart mysql-server</code></pre>
+              </div>
+              <div class="cmd">
+                <div class="cmdTop"><span>Restart mosquitto</span><button class="copy" data-copy>Copy</button></div>
+                <pre><code>sudo docker restart mosquitto</code></pre>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="text-sm font-semibold text-slate-200">2) Cek status container</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-sudo docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-              </code></pre>
-              <div class="text-xs text-slate-400 mt-2">
-                Pastikan semua service penting <span class="text-slate-200">Up</span> dan port terbuka.
-              </div>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="text-sm font-semibold text-slate-200">3) Smoke test endpoint</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-curl -m 3 -I http://10.5.1.148:5173 | head
-curl -m 3 -I http://10.5.1.148:8000 | head
-curl -m 3 -i http://10.5.1.148:8000/wira | head
-              </code></pre>
-              <div class="text-xs text-slate-400 mt-2">
-                Proxy <span class="text-slate-200">harus</span> bisa akses backend dengan header API key (proxy yang
-                nambahin).
-              </div>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="text-sm font-semibold text-slate-200">4) Verifikasi backend auth normal</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-# Ini akan 403 (NORMAL) karena tanpa API key header
-curl -m 3 -i http://10.5.1.148:7000/wira | head -n 12
-
-# Ini harus 200 karena proxy menambahkan header X-Api-Key
-curl -m 3 -i http://10.5.1.148:8000/wira | head
-              </code></pre>
-              <div class="text-xs text-slate-400 mt-2">
-                403 di backend langsung bukan error, itu tanda proteksi jalan.
-              </div>
+        <div class="step">
+          <div class="stepNo">5</div>
+          <div class="stepBody">
+            <div class="stepTitle">Kalau masih bermasalah, ambil log 60 baris</div>
+            <div class="cmd">
+              <div class="cmdTop"><span>Terminal</span><button class="copy" data-copy>Copy</button></div>
+              <pre><code>sudo docker logs --tail=60 rfid-proxy
+sudo docker logs --tail=60 django-gm1
+sudo docker logs --tail=60 mysql-server
+sudo docker logs --tail=60 mosquitto
+sudo docker logs --tail=60 mqtt-listener</code></pre>
             </div>
           </div>
-        </section>
-
-        <!-- Overview -->
-        <section id="overview" class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
-          <h2 class="text-2xl font-semibold">1. Overview Arsitektur</h2>
-          <p class="text-slate-300 mt-3 leading-relaxed">
-            Stack ini terdiri dari 3 lapisan utama:
-          </p>
-          <div class="mt-4 grid gap-4">
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold">A) Data & Messaging Layer</div>
-              <ul class="list-disc ml-6 mt-2 text-slate-300">
-                <li><span class="font-semibold">MySQL</span>: database utama (user, garment, tracking_movement, dll).
-                </li>
-                <li><span class="font-semibold">Redis</span>: channel layer untuk Django Channels (WebSocket).</li>
-                <li><span class="font-semibold">Mosquitto</span>: MQTT broker untuk event RFID (topic rfid/gt/id).</li>
-              </ul>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold">B) Backend Layer</div>
-              <ul class="list-disc ml-6 mt-2 text-slate-300">
-                <li><span class="font-semibold">Django ASGI (daphne)</span>: API + WebSocket endpoint.</li>
-                <li><span class="font-semibold">move_worker</span>: worker loop memindahkan data DONE ke tabel <code
-                    class="bg-black/40 px-1 rounded">tracking_movement_end</code>.</li>
-                <li><span class="font-semibold">mqtt_listener</span>: subscriber MQTT, menerima event lalu update
-                  DB/backend logic.</li>
-              </ul>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold">C) Frontend Layer</div>
-              <ul class="list-disc ml-6 mt-2 text-slate-300">
-                <li><span class="font-semibold">Frontend (Vite)</span>: UI dashboard di port 5173.</li>
-                <li><span class="font-semibold">Proxy Node (Express)</span>: port 8000, jadi “gerbang” ke backend karena
-                  dia otomatis menambahkan API key header.</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="mt-6 rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-            <div class="font-semibold mb-2">Alur request (yang benar)</div>
-            <ol class="list-decimal ml-6 text-slate-300">
-              <li>User buka UI: <span class="font-mono">http://10.5.1.148:5173</span></li>
-              <li>UI akses API ke Proxy: <span class="font-mono">http://10.5.1.148:8000</span></li>
-              <li>Proxy meneruskan ke Backend: <span class="font-mono">http://django-gm1:7000</span> sambil menambahkan
-                <span class="font-mono">X-Api-Key</span></li>
-              <li>Backend akses DB MySQL dan Redis, dan mqtt_listener terima event dari Mosquitto</li>
-            </ol>
-          </div>
-        </section>
-
-        <!-- Terms -->
-        <section id="terms" class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
-          <h2 class="text-2xl font-semibold">2. Istilah & Pengertian Singkat</h2>
-          <div class="mt-4 grid md:grid-cols-2 gap-4 text-slate-300">
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">docker compose</div>
-              <p class="mt-2 text-sm">
-                Cara menjalankan banyak container sekaligus dari satu file <code
-                  class="bg-black/40 px-1 rounded">docker-compose.yml</code>.
-                Tujuannya supaya tidak mengetik perintah docker run panjang-panjang.
-              </p>
-            </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">container</div>
-              <p class="mt-2 text-sm">
-                Instance yang sedang berjalan dari sebuah image. Contoh: <code
-                  class="bg-black/40 px-1 rounded">django-gm1</code> adalah container backend.
-              </p>
-            </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">image</div>
-              <p class="mt-2 text-sm">
-                “Template” untuk membuat container. Contoh: <code
-                  class="bg-black/40 px-1 rounded">garment-backend:1.0</code>.
-              </p>
-            </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">volume</div>
-              <p class="mt-2 text-sm">
-                Storage persistent. DB MySQL biasanya wajib pakai volume supaya data tidak hilang saat container
-                dihapus.
-              </p>
-            </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">network (bridge)</div>
-              <p class="mt-2 text-sm">
-                Jaringan internal antar container. Dengan network yang sama, container bisa saling panggil pakai nama
-                service,
-                misal <code class="bg-black/40 px-1 rounded">mysql-server</code> atau <code
-                  class="bg-black/40 px-1 rounded">django-gm1</code>.
-              </p>
-            </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">ports mapping</div>
-              <p class="mt-2 text-sm">
-                Menghubungkan port container ke port host. Contoh: <code
-                  class="bg-black/40 px-1 rounded">7000:7000</code>.
-              </p>
-            </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">Daphne / ASGI / Channels</div>
-              <p class="mt-2 text-sm">
-                Daphne adalah server ASGI. Django Channels butuh Redis sebagai channel layer untuk WebSocket. Tanpa
-                Redis, WS error.
-              </p>
-            </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">Proxy API</div>
-              <p class="mt-2 text-sm">
-                Server Node (Express) yang meneruskan request ke backend sambil menambahkan API key, serta punya
-                beberapa fitur tambahan.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Services -->
-        <section id="services" class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
-          <h2 class="text-2xl font-semibold">3. Daftar Service dan Fungsinya</h2>
-
-          <div class="mt-4 overflow-x-auto rounded-xl border border-slate-800">
-            <table class="min-w-full text-sm">
-              <thead class="bg-slate-900">
-                <tr class="text-left text-slate-300">
-                  <th class="p-3 border-b border-slate-800">Service</th>
-                  <th class="p-3 border-b border-slate-800">Container</th>
-                  <th class="p-3 border-b border-slate-800">Port</th>
-                  <th class="p-3 border-b border-slate-800">Fungsi</th>
-                </tr>
-              </thead>
-              <tbody class="bg-slate-950/20">
-                <tr class="border-b border-slate-800">
-                  <td class="p-3 font-mono">frontend</td>
-                  <td class="p-3 font-mono">rfid-frontend</td>
-                  <td class="p-3 font-mono">5173</td>
-                  <td class="p-3 text-slate-300">UI Vite/React</td>
-                </tr>
-                <tr class="border-b border-slate-800">
-                  <td class="p-3 font-mono">proxy</td>
-                  <td class="p-3 font-mono">rfid-proxy</td>
-                  <td class="p-3 font-mono">8000</td>
-                  <td class="p-3 text-slate-300">Express proxy, tambahkan API Key, bridge UI ↔ Backend</td>
-                </tr>
-                <tr class="border-b border-slate-800">
-                  <td class="p-3 font-mono">backend</td>
-                  <td class="p-3 font-mono">django-gm1</td>
-                  <td class="p-3 font-mono">7000</td>
-                  <td class="p-3 text-slate-300">Django API + WebSocket (daphne)</td>
-                </tr>
-                <tr class="border-b border-slate-800">
-                  <td class="p-3 font-mono">move_worker</td>
-                  <td class="p-3 font-mono">django-move</td>
-                  <td class="p-3 font-mono">-</td>
-                  <td class="p-3 text-slate-300">Worker loop <code class="bg-black/40 px-1 rounded">move_data</code>
-                  </td>
-                </tr>
-                <tr class="border-b border-slate-800">
-                  <td class="p-3 font-mono">mqtt_listener</td>
-                  <td class="p-3 font-mono">mqtt-listener</td>
-                  <td class="p-3 font-mono">-</td>
-                  <td class="p-3 text-slate-300">Subscriber MQTT, jalankan <code
-                      class="bg-black/40 px-1 rounded">start_mqtt</code></td>
-                </tr>
-                <tr class="border-b border-slate-800">
-                  <td class="p-3 font-mono">mysql</td>
-                  <td class="p-3 font-mono">mysql-server</td>
-                  <td class="p-3 font-mono">3306</td>
-                  <td class="p-3 text-slate-300">Database</td>
-                </tr>
-                <tr class="border-b border-slate-800">
-                  <td class="p-3 font-mono">redis</td>
-                  <td class="p-3 font-mono">redis</td>
-                  <td class="p-3 font-mono">6379</td>
-                  <td class="p-3 text-slate-300">Channel layer untuk WebSocket</td>
-                </tr>
-                <tr class="border-b border-slate-800">
-                  <td class="p-3 font-mono">mosquitto</td>
-                  <td class="p-3 font-mono">mosquitto</td>
-                  <td class="p-3 font-mono">1883 / 9001</td>
-                  <td class="p-3 text-slate-300">MQTT broker (mqtt + websockets)</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- Start/Stop -->
-        <section id="startstop" class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
-          <h2 class="text-2xl font-semibold">4. Cara Start / Stop / Restart</h2>
-
-          <div class="mt-4 grid gap-4">
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold">Start semua service</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-cd ~/docker-stack
-sudo docker compose up -d --build
-              </code></pre>
-              <p class="text-xs text-slate-400 mt-2">
-                Gunakan ini setelah reboot server. Kalau tidak ada perubahan kode, boleh tanpa <span
-                  class="text-slate-200">--build</span>.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold">Stop semua service stack (tanpa hapus data volume)</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-cd ~/docker-stack
-sudo docker compose down
-              </code></pre>
-              <p class="text-xs text-slate-400 mt-2">
-                Ini akan menghapus container compose, tapi volume eksternal (misal <code
-                  class="bg-black/40 px-1 rounded">mysql_data</code>) tetap aman.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold">Restart 1 service saja</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-cd ~/docker-stack
-sudo docker compose up -d --no-deps --force-recreate proxy
-# atau
-sudo docker restart rfid-proxy
-              </code></pre>
-              <p class="text-xs text-slate-400 mt-2">
-                Kalau kamu cuma ubah <code class="bg-black/40 px-1 rounded">server.js</code> proxy, restart proxy saja.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold">Lihat log</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-sudo docker logs --tail=200 rfid-proxy
-sudo docker logs --tail=200 django-gm1
-sudo docker logs --tail=200 mysql-server
-sudo docker logs --tail=200 mosquitto
-              </code></pre>
-            </div>
-          </div>
-        </section>
-
-        <!-- Verify -->
-        <section id="verify" class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
-          <h2 class="text-2xl font-semibold">5. Tahapan Pengecekan Menyeluruh (Checklist)</h2>
-
-          <div class="mt-4 grid gap-4">
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">A) Status container dan port</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-sudo docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-              </code></pre>
-              <ul class="list-disc ml-6 mt-2 text-sm text-slate-300">
-                <li>Pastikan <code class="bg-black/40 px-1 rounded">django-gm1</code>, <code
-                    class="bg-black/40 px-1 rounded">rfid-proxy</code>, <code
-                    class="bg-black/40 px-1 rounded">rfid-frontend</code> status <span class="text-slate-200">Up</span>.
-                </li>
-                <li>Pastikan port 5173, 8000, 7000 terlihat mapping ke 0.0.0.0.</li>
-              </ul>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">B) Health test dari host</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-curl -m 3 -I http://10.5.1.148:5173 | head
-curl -m 3 -I http://10.5.1.148:8000 | head
-curl -m 3 -I http://10.5.1.148:7000 | head
-              </code></pre>
-              <p class="text-xs text-slate-400 mt-2">
-                Backend boleh 200 untuk root, tapi endpoint tertentu butuh API key sehingga bisa 403.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">C) Pastikan proxy bisa akses endpoint protected</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-# Akses backend langsung tanpa header: 403 (normal)
-curl -m 3 -i http://10.5.1.148:7000/wira | head -n 12
-
-# Akses via proxy: 200 (wajib)
-curl -m 3 -i http://10.5.1.148:8000/wira | head
-              </code></pre>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">D) Cek dari dalam proxy container (DNS + backend)</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-sudo docker exec -it rfid-proxy sh -lc "getent hosts django-gm1 mysql-server redis mosquitto"
-sudo docker exec -it rfid-proxy sh -lc "env | grep -E 'BACKEND|MYSQL_'"
-              </code></pre>
-              <p class="text-xs text-slate-400 mt-2">
-                Kalau DNS tidak resolve, berarti beda network atau service tidak join network.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">E) Cek Django DB dan Redis</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-sudo docker exec -it django-gm1 sh -lc "python manage.py shell -c \"from django.db import connection; connection.cursor().execute('SELECT 1'); print('DJANGO DB OK')\""
-sudo docker exec -it django-gm1 sh -lc "python -c \"import socket; s=socket.socket(); s.settimeout(2); s.connect(('redis',6379)); print('REDIS TCP OK')\""
-              </code></pre>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">F) Cek Mosquitto config & port</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-sudo docker logs --tail=80 mosquitto
-sudo docker exec -it mosquitto sh -lc "cat /mosquitto/config/mosquitto.conf | head -n 20"
-              </code></pre>
-              <p class="text-xs text-slate-400 mt-2">
-                Kalau muncul <span class="text-slate-200">Unable to open config file</span>, biasanya path mount atau
-                permission folder.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">G) Cek mqtt-listener bisa connect broker</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-sudo docker logs --tail=120 mqtt-listener
-sudo docker exec -it mqtt-listener sh -lc "python -c \"import socket; s=socket.socket(); s.settimeout(2); s.connect(('mosquitto',1883)); print('MQTT TCP OK')\""
-              </code></pre>
-              <p class="text-xs text-slate-400 mt-2">
-                Jika masih refused, cek apakah env MQTT_BROKER sudah benar dan broker benar-benar up.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Troubleshooting -->
-        <section id="troubleshoot" class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
-          <h2 class="text-2xl font-semibold">6. Troubleshooting (Kasus umum & solusi)</h2>
-
-          <div class="mt-4 grid gap-4">
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-amber-200">Kasus 1: Backend /wira 403</div>
-              <p class="text-slate-300 mt-2 text-sm">
-                Ini <span class="text-slate-100 font-semibold">normal</span> kalau kamu akses backend langsung tanpa API
-                key header.
-                Solusinya bukan “benerin auth”, tapi pastikan UI pakai proxy atau Postman kirim header <code
-                  class="bg-black/40 px-1 rounded">X-Api-Key</code>.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-amber-200">Kasus 2: Proxy timeout ke backend (UND_ERR_CONNECT_TIMEOUT)
-              </div>
-              <ul class="list-disc ml-6 mt-2 text-sm text-slate-300">
-                <li>Biasanya karena proxy masih mengarah ke IP lama (10.5.1.148) padahal seharusnya ke service name
-                  <code class="bg-black/40 px-1 rounded">django-gm1</code>.</li>
-                <li>Fix: set <code class="bg-black/40 px-1 rounded">BACKEND_URL=http://django-gm1:7000</code> di
-                  compose.</li>
-                <li>Restart proxy: <code
-                    class="bg-black/40 px-1 rounded">sudo docker compose up -d --no-deps --force-recreate proxy</code>.
-                </li>
-              </ul>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-amber-200">Kasus 3: MySQL Access Denied (ER_ACCESS_DENIED_ERROR)</div>
-              <p class="text-slate-300 mt-2 text-sm">
-                Ini murni mismatch user/password. Di server.js kamu dulu ada password root <code
-                  class="bg-black/40 px-1 rounded">satu1</code>,
-                sementara MySQL root password yang dipakai stack ini <code
-                  class="bg-black/40 px-1 rounded">123456</code>.
-                Fix: samakan password di environment proxy atau ubah server.js agar membaca dari env.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-amber-200">Kasus 4: Mosquitto "Unable to open config file"</div>
-              <ul class="list-disc ml-6 mt-2 text-sm text-slate-300">
-                <li>Pastikan file ada di host: <code
-                    class="bg-black/40 px-1 rounded">/home/robotics/mosquitto/config/mosquitto.conf</code></li>
-                <li>Pastikan mount benar dan permission folder bisa diakses.</li>
-                <li>Paling aman: gunakan path absolut di compose (yang kamu sudah lakukan).</li>
-              </ul>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-amber-200">Kasus 5: Redis ConnectionRefused</div>
-              <p class="text-slate-300 mt-2 text-sm">
-                Biasanya karena backend memakai host <code class="bg-black/40 px-1 rounded">10.0.0.1</code> atau IP
-                random.
-                Fix yang benar adalah gunakan service name: <code
-                  class="bg-black/40 px-1 rounded">("redis", 6379)</code> di CHANNEL_LAYERS.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Cleanup -->
-        <section id="cleanup" class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
-          <h2 class="text-2xl font-semibold">7. Cleanup (Images, Containers, Volumes) Aman</h2>
-
-          <div class="mt-3 text-slate-300">
-            Kamu punya image yang tidak dipakai lagi seperti <code
-              class="bg-black/40 px-1 rounded">garment-tracking:1.0</code> (ID berbeda),
-            dan beberapa image duplikat <code class="bg-black/40 px-1 rounded">rfid_tracking_v2_*</code>. Ini aman
-            dibersihkan untuk hemat disk,
-            selama tidak dipakai oleh container yang sedang up.
-          </div>
-
-          <div class="mt-4 grid gap-4">
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">A) Hapus image yang jelas tidak dipakai</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-# Contoh: garment-tracking:1.0 tidak dipakai oleh container manapun
-sudo docker image rm garment-tracking:1.0
-
-# Hapus image duplikat (cek dulu: docker ps menggunakan yang mana)
-sudo docker image rm rfid-proxy:1.0 rfid_tracking_v2-proxy:latest rfid_tracking_v2_proxy:latest || true
-sudo docker image rm rfid_tracking_v2-frontend:latest rfid_tracking_v2_frontend:latest rfid_tracking_v2_rfid-frontend:latest || true
-              </code></pre>
-              <p class="text-xs text-slate-400 mt-2">
-                Kalau ada error “image is being used”, berarti masih dipakai container. Stop/hapus containernya dulu.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">B) Bersihkan dangling images</div>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-sudo docker image prune
-              </code></pre>
-            </div>
-
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-              <div class="font-semibold text-slate-200">C) Bersihkan volume yang benar-benar tidak dipakai</div>
-              <p class="text-sm text-slate-300 mt-2">
-                Jangan hapus <code class="bg-black/40 px-1 rounded">mysql_data</code> kalau itu menyimpan data produksi.
-                Yang aman dibersihkan biasanya volume hash acak yang tidak terpakai.
-              </p>
-              <pre class="mt-3 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"><code class="font-mono text-slate-200">
-# Lihat volume yang dipakai container
-sudo docker volume ls
-sudo docker volume prune
-              </code></pre>
-              <p class="text-xs text-slate-400 mt-2">
-                <span class="text-slate-200">docker volume prune</span> hanya hapus volume yang tidak terpakai oleh
-                container manapun.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Security -->
-        <section id="security" class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
-          <h2 class="text-2xl font-semibold">8. Catatan Keamanan (yang perlu kamu tahu)</h2>
-          <ul class="list-disc ml-6 mt-3 text-slate-300">
-            <li>Port <span class="font-mono">3306</span> (MySQL) terbuka ke 0.0.0.0. Kalau ini server production, ini
-              risk. Idealnya batasi ke LAN tertentu atau tidak dipublish (cukup internal docker network).</li>
-            <li>API key jangan ditaruh hardcode di repo publik. Minimal taruh di env / secret. Saat ini proxy menambah
-              header API key, itu benar, tapi tetap rahasiakan key-nya.</li>
-            <li>Worker <code class="bg-black/40 px-1 rounded">move_data</code> loop tanpa henti. Pastikan ada
-              log/monitor agar kalau error tidak silent.</li>
-          </ul>
-        </section>
-
-        <footer class="text-xs text-slate-500 pt-6">
-          Dibuat untuk operasional harian. Kalau kamu mau, aku bisa rapikan lagi jadi ada “diagram arsitektur” (visual)
-          dan halaman print-friendly.
-        </footer>
+        </div>
 
       </section>
-    </div>
+
+      <section class="card">
+        <div class="cardHead">
+          <h2>Mode Simpel: Stop aman</h2>
+          <p class="muted">Menghentikan stack compose tanpa menghapus volume eksternal seperti <code>mysql_data</code>.
+          </p>
+        </div>
+        <div class="cmd">
+          <div class="cmdTop"><span>Terminal</span><button class="copy" data-copy>Copy</button></div>
+          <pre><code>cd ~/docker-stack
+sudo docker compose down</code></pre>
+        </div>
+      </section>
+    </section>
+
+    <!-- ADVANCED MODE -->
+    <section class="panel" id="tab-advanced" data-panel="advanced">
+      <section class="card">
+        <div class="cardHead">
+          <h2>Mode Komplek: Penjelasan tiap container & fungsi</h2>
+          <p class="muted">
+            Di sini kita bedah tiap komponen, hubungannya, cara cek, cara masuk shell, dan error yang umum.
+          </p>
+        </div>
+
+        <div class="tableWrap">
+          <table class="tbl" id="servicesTable">
+            <thead>
+              <tr>
+                <th>Komponen</th>
+                <th>Container</th>
+                <th>Image</th>
+                <th>Port</th>
+                <th>Fungsi Inti</th>
+                <th>Cek cepat</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="tag ui">UI</span> Frontend</td>
+                <td><code>rfid-frontend</code></td>
+                <td><code>rfid-frontend:1.0</code></td>
+                <td><code>5173</code></td>
+                <td>Vite/React UI, akses via browser.</td>
+                <td><code>curl -I -m 3 http://10.5.3.195:5173 | head</code></td>
+              </tr>
+              <tr>
+                <td><span class="tag api">API</span> Proxy</td>
+                <td><code>rfid-proxy</code></td>
+                <td><code>docker-stack-proxy:latest</code></td>
+                <td><code>8000</code></td>
+                <td>Express proxy. Tambah header <code>X-Api-Key</code>, meneruskan request UI ke backend.</td>
+                <td><code>curl -m 3 http://10.5.3.195:8000/wira | head</code></td>
+              </tr>
+              <tr>
+                <td><span class="tag be">BE</span> Django</td>
+                <td><code>django-gm1</code></td>
+                <td><code>garment-backend:1.0</code></td>
+                <td><code>7000</code></td>
+                <td>Django ASGI (daphne). API + WebSocket, akses DB MySQL dan Redis.</td>
+                <td><code>curl -I -m 3 http://10.5.3.195:7000 | head</code></td>
+              </tr>
+              <tr>
+                <td><span class="tag wk">WK</span> Move Worker</td>
+                <td><code>django-move</code></td>
+                <td><code>garment-backend:1.0</code></td>
+                <td>-</td>
+                <td>Loop <code>python manage.py move_data</code>, memindahkan data DONE ke tabel end.</td>
+                <td><code>sudo docker logs --tail=80 django-move</code></td>
+              </tr>
+              <tr>
+                <td><span class="tag wk">WK</span> MQTT Listener</td>
+                <td><code>mqtt-listener</code></td>
+                <td><code>garment-backend:1.0</code></td>
+                <td>-</td>
+                <td>Subscriber MQTT, menerima event RFID dari Mosquitto dan update DB/logic backend.</td>
+                <td><code>sudo docker logs --tail=120 mqtt-listener</code></td>
+              </tr>
+              <tr>
+                <td><span class="tag db">DB</span> MySQL</td>
+                <td><code>mysql-server</code></td>
+                <td><code>mysql:8.0</code></td>
+                <td><code>3306</code></td>
+                <td>Database utama. Data harus persistent via volume <code>mysql_data</code>.</td>
+                <td><code>sudo docker exec -it mysql-server mysql -u root -p123456 -e "SHOW DATABASES;"</code></td>
+              </tr>
+              <tr>
+                <td><span class="tag cache">Cache</span> Redis</td>
+                <td><code>redis</code></td>
+                <td><code>redis:7</code></td>
+                <td><code>6379</code></td>
+                <td>Channel layer untuk WebSocket Django Channels.</td>
+                <td>
+                  <code>sudo docker exec -it django-gm1 sh -lc "python -c \"import socket; s=socket.socket(); s.settimeout(2); s.connect(('redis',6379)); print('OK')\""</code>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="tag mqtt">MQTT</span> Mosquitto</td>
+                <td><code>mosquitto</code></td>
+                <td><code>eclipse-mosquitto</code></td>
+                <td><code>1883 / 9001</code></td>
+                <td>MQTT broker. Config dari bind mount <code>/home/robotics/mosquitto/config</code>.</td>
+                <td><code>sudo docker logs --tail=80 mosquitto</code></td>
+              </tr>
+              <tr>
+                <td><span class="tag aux">AUX</span> Node-RED</td>
+                <td><code>nodered-*</code></td>
+                <td><code>nodered/node-red</code></td>
+                <td><code>1881-1885</code></td>
+                <td>Flow automation (gm1/gm2/gm3/test). Bukan bagian wajib login UI, tapi sering dipakai integrasi.</td>
+                <td><code>curl -I -m 3 http://10.5.3.195:1881 | head</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note warn">
+          <strong>Poin krusial:</strong> endpoint backend tertentu (contoh <code>/wira</code>) akan <code>403</code>
+          jika diakses langsung tanpa header.
+          Itu normal. Akses yang benar adalah lewat proxy <code>:8000</code>.
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="cardHead">
+          <h2>Masuk ke shell container (bash/sh), cek env, cek file</h2>
+          <p class="muted">Ini cara “masuk mesin” untuk investigasi.</p>
+        </div>
+
+        <div class="grid2">
+          <div class="cmd">
+            <div class="cmdTop"><span>Masuk backend (sh)</span><button class="copy" data-copy>Copy</button></div>
+            <pre><code>sudo docker exec -it django-gm1 sh</code></pre>
+          </div>
+          <div class="cmd">
+            <div class="cmdTop"><span>Masuk proxy (sh)</span><button class="copy" data-copy>Copy</button></div>
+            <pre><code>sudo docker exec -it rfid-proxy sh</code></pre>
+          </div>
+          <div class="cmd">
+            <div class="cmdTop"><span>Masuk mysql (shell)</span><button class="copy" data-copy>Copy</button></div>
+            <pre><code>sudo docker exec -it mysql-server bash</code></pre>
+          </div>
+          <div class="cmd">
+            <div class="cmdTop"><span>Cek env penting di proxy</span><button class="copy" data-copy>Copy</button></div>
+            <pre><code>sudo docker exec -it rfid-proxy sh -lc "env | grep -E 'BACKEND|MYSQL_|ENV|CURRENT' "</code></pre>
+          </div>
+        </div>
+
+        <div class="note ok">
+          <strong>Tips:</strong> kalau container kecil dan tidak ada <code>bash</code>, pakai <code>sh</code>.
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="cardHead">
+          <h2>Pengecekan menyeluruh (step-by-step)</h2>
+          <p class="muted">Ini versi “audit cepat” yang rapi, urut dari network sampai aplikasi.</p>
+        </div>
+
+        <ol class="checklist" id="advancedChecklist">
+          <li><label><input type="checkbox" /> Cek status semua container: <code>docker ps</code></label></li>
+          <li><label><input type="checkbox" /> DNS antar container resolve:
+              <code>getent hosts django-gm1 mysql-server redis mosquitto</code></label></li>
+          <li><label><input type="checkbox" /> Proxy bisa hit API backend:
+              <code>curl http://10.5.3.195:8000/wira</code></label></li>
+          <li><label><input type="checkbox" /> Backend DB OK: run Django shell SELECT 1</label></li>
+          <li><label><input type="checkbox" /> Redis TCP OK dari backend container</label></li>
+          <li><label><input type="checkbox" /> Mosquitto running + config loaded (cek log)</label></li>
+          <li><label><input type="checkbox" /> mqtt-listener connect ke mosquitto (cek log)</label></li>
+          <li><label><input type="checkbox" /> Frontend 5173 OK (curl -I)</label></li>
+        </ol>
+
+        <div class="cmd">
+          <div class="cmdTop"><span>Bundle command audit (copy sekali)</span><button class="copy"
+              data-copy>Copy</button></div>
+          <pre><code>sudo docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+sudo docker exec -it rfid-proxy sh -lc "getent hosts django-gm1 mysql-server redis mosquitto"
+curl -m 3 -sS http://10.5.3.195:8000/wira | head
+sudo docker exec -it django-gm1 sh -lc "python manage.py shell -c \"from django.db import connection; connection.cursor().execute('SELECT 1'); print('DJANGO DB OK')\""
+sudo docker exec -it django-gm1 sh -lc "python -c \"import socket; s=socket.socket(); s.settimeout(2); s.connect(('redis',6379)); print('REDIS TCP OK')\""
+sudo docker logs --tail=60 mosquitto
+sudo docker logs --tail=80 mqtt-listener
+curl -m 3 -I http://10.5.3.195:5173 | head</code></pre>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="cardHead">
+          <h2>Masalah yang paling sering (dan artinya)</h2>
+          <div class="muted">Biar kamu cepat “nembak” sumber masalah tanpa muter-muter.</div>
+        </div>
+
+        <div class="faq">
+          <details>
+            <summary>Backend <code>/wira</code> 403 Forbidden</summary>
+            <div class="faqBody">
+              Itu normal kalau akses langsung ke <code>:7000</code> tanpa header <code>X-Api-Key</code>.
+              Solusi: akses via proxy <code>:8000</code> atau kirim header API key dari Postman.
+            </div>
+          </details>
+          <details>
+            <summary>Proxy timeout ke backend (ConnectTimeout / UND_ERR_CONNECT_TIMEOUT)</summary>
+            <div class="faqBody">
+              Biasanya proxy masih mengarah ke IP lama (misal <code>10.5.3.195:7000</code>) padahal harusnya bisa pakai
+              service name.
+              Pastikan environment: <code>BACKEND_URL=http://django-gm1:7000</code>.
+              Restart proxy.
+            </div>
+          </details>
+          <details>
+            <summary>MySQL denied (ER_ACCESS_DENIED_ERROR)</summary>
+            <div class="faqBody">
+              Password/user tidak sama. Di server.js lama ada password <code>satu1</code> untuk root, tapi stack MySQL
+              pakai <code>123456</code>.
+              Fix: pakai env MYSQL_USER/MYSQL_PASSWORD dari compose, dan pastikan code server.js tidak override.
+            </div>
+          </details>
+          <details>
+            <summary>Mosquitto tidak bisa load config file</summary>
+            <div class="faqBody">
+              Biasanya mount path salah atau permission folder tidak bisa diakses.
+              Gunakan path absolut dan pastikan file ada: <code>/home/robotics/mosquitto/config/mosquitto.conf</code>.
+            </div>
+          </details>
+          <details>
+            <summary>mqtt-listener "Connection refused" ke mosquitto</summary>
+            <div class="faqBody">
+              Broker belum up, salah host/port env, atau container belum join network.
+              Cek log mosquitto, lalu test TCP dari mqtt-listener container.
+            </div>
+          </details>
+        </div>
+      </section>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div>
+        <strong>Ringkasnya:</strong> Akses UI lewat <code>:5173</code>, API lewat Proxy <code>:8000</code>, Backend
+        <code>:7000</code> jangan dites tanpa API key (403 normal).
+      </div>
+      <div class="muted">File: index.html, style.css, script.js</div>
+    </footer>
   </main>
+
+  <div class="toast" id="toast" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="js/script.js"></script>
 </body>
 
 </html>
