@@ -77,6 +77,9 @@ pre {
 
 pre code {
   white-space: pre;
+  display: inline-block;
+    /* penting: scroll tetap di box */
+    min-width: 100%;
 }
 
 /* Pastikan konten selalu di atas backlight */
@@ -389,6 +392,7 @@ footer,
   border-radius: 14px;
   overflow: hidden;
   background: var(--soft);
+  max-width: 100%;
 }
 
 .cmdTop {
@@ -404,6 +408,7 @@ footer,
 .cmd pre {
   padding: 12px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .cmd code {
@@ -725,4 +730,76 @@ footer,
     height: 56px;
     border-radius: 16px;
   }
+}
+/* =========================
+   MOBILE OVERFLOW FIX (SIMPLE MODE)
+   target: page tidak boleh ikut geser horizontal
+   ========================= */
+
+/* 1) kunci page dari horizontal scroll */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  /* lebih bagus dari hidden, fallback di bawah */
+}
+
+@supports not (overflow: clip) {
+
+  html,
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* 2) pastikan wrapper juga tidak menciptakan overflow */
+.wrap,
+.card,
+.step,
+.grid2 {
+  max-width: 100%;
+}
+
+/* 3) FIX UTAMA: flex item boleh menyusut (ini yang biasanya bikin “nabrak kanan”) */
+.stepBody,
+.cmd,
+.cmd pre,
+.tableWrap {
+  min-width: 0;
+  /* PENTING untuk flex/grid */
+}
+
+/* 4) kode panjang harus scroll DI DALAM box, bukan mendorong layout */
+.cmd {
+  overflow: hidden;
+}
+
+/* biar radius rapi */
+.cmd pre {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cmd pre code {
+  white-space: pre;
+  /* jangan wrap */
+  display: inline-block;
+  /* bikin scroll width mengikuti konten */
+  min-width: 100%;
+  /* isi pendek tetap penuh */
+}
+
+/* 5) kadang yang bikin overflow itu elemen yang “kepanjangan” (tag, link, code inline) */
+code,
+.v,
+.kv {
+  overflow-wrap: anywhere;
+}
+
+/* 6) khusus iOS: cegah zoom/geser aneh di input */
+input,
+button {
+  max-width: 100%;
 }
