@@ -1,10 +1,9 @@
-/* style.css (clean, no duplicates) */
+/* style.css (FULL, clean, desktop tetap lega, mobile tidak “nabrak kanan”) */
 
 /* =========================
    THEME TOKENS
 ========================= */
 :root {
-  /* base */
   --bg: #f7f8fb;
   --card: #ffffff;
   --text: #0f172a;
@@ -42,7 +41,6 @@
   --soft: #0b1324;
   --shadow: 0 12px 40px rgba(0, 0, 0, .35);
 
-  /* dark glow can be slightly stronger */
   --glowA: rgba(124, 58, 237, .28);
   --glowB: rgba(34, 211, 238, .22);
   --glowC: rgba(251, 113, 133, .18);
@@ -53,6 +51,11 @@
 ========================= */
 * {
   box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
@@ -75,14 +78,16 @@ pre {
   margin: 0;
 }
 
+/* IMPORTANT:
+   Jangan pakai min-width:100% di desktop, itu sering bikin mobile “geser kanan” */
 pre code {
   white-space: pre;
   display: inline-block;
-    /* penting: scroll tetap di box */
-    min-width: 100%;
+  min-width: max-content;
+  /* konten panjang => scroll di dalam box */
 }
 
-/* Pastikan konten selalu di atas backlight */
+/* Pastikan konten selalu di atas glow */
 header,
 main,
 footer,
@@ -108,7 +113,7 @@ footer,
   background: rgba(11, 18, 32, .68);
 }
 
-/* Layout bar */
+/* Layout bar (support HTML kamu: .topbar .brand) */
 .topbar .brand {
   max-width: 1120px;
   margin: 0 auto;
@@ -119,6 +124,7 @@ footer,
   gap: 16px;
 }
 
+/* Support opsi struktur baru (kalau nanti kamu pakai) */
 .brandLeft {
   display: flex;
   align-items: center;
@@ -131,7 +137,7 @@ footer,
   gap: 6px;
 }
 
-/* Logo besar */
+/* Logo (img.logo pada HTML kamu) */
 .logo {
   width: 64px;
   height: 64px;
@@ -146,12 +152,17 @@ footer,
   transform: translateZ(0);
 }
 
-/* Title + loop animation */
-.heroTitle {
-  font-size: 18px;
+/* Title animasi (kalau kamu ganti class title -> heroTitle) */
+.heroTitle,
+.title {
   font-weight: 900;
   letter-spacing: .2px;
   line-height: 1.1;
+}
+
+/* Jika kamu pakai class heroTitle: gradient + loop */
+.heroTitle {
+  font-size: 18px;
   display: inline-block;
   background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3), var(--accent));
   background-size: 220% 100%;
@@ -189,39 +200,6 @@ footer,
   margin-top: 2px;
 }
 
-/* Theme button area (taruh di bawah logo lewat HTML structure) */
-.themeRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.themeBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  color: var(--text);
-  background: linear-gradient(180deg, rgba(124, 58, 237, .10), rgba(34, 211, 238, .08));
-  box-shadow: 0 10px 26px rgba(15, 23, 42, .08);
-  cursor: pointer;
-}
-
-.themeBtn:hover {
-  border-color: rgba(124, 58, 237, .45);
-}
-
-.themeDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, var(--accent2), var(--accent));
-  box-shadow: 0 0 0 6px rgba(34, 211, 238, .10);
-}
-
-/* Right side actions */
 .actions {
   display: flex;
   align-items: center;
@@ -229,10 +207,56 @@ footer,
 }
 
 /* =========================
+   BUTTONS / INPUT
+========================= */
+.btn {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  padding: 9px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, .08);
+}
+
+.btn:hover {
+  border-color: rgba(124, 58, 237, .45);
+}
+
+.btn.ghost {
+  box-shadow: none;
+  background: transparent;
+}
+
+.search {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+  justify-content: flex-end;
+  min-width: 260px;
+}
+
+.search input {
+  width: min(520px, 100%);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  outline: none;
+}
+
+.search input:focus {
+  border-color: rgba(124, 58, 237, .45);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, .12);
+}
+
+/* =========================
    LAYOUT
 ========================= */
 .wrap {
   max-width: 1120px;
+  /* desktop tetap ada ruang kanan-kiri */
   margin: 18px auto 40px;
   padding: 0 16px;
 }
@@ -272,31 +296,8 @@ footer,
   box-shadow: 0 8px 20px rgba(15, 23, 42, .08);
 }
 
-.search {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex: 1;
-  justify-content: flex-end;
-  min-width: 260px;
-}
-
-.search input {
-  width: min(520px, 100%);
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  outline: none;
-}
-
-.search input:focus {
-  border-color: rgba(124, 58, 237, .45);
-  box-shadow: 0 0 0 4px rgba(124, 58, 237, .12);
-}
-
 /* =========================
-   CARD / PANELS
+   CARDS / PANELS
 ========================= */
 .card {
   background: var(--card);
@@ -354,7 +355,9 @@ footer,
   display: block;
 }
 
-/* Steps */
+/* =========================
+   STEPS
+========================= */
 .step {
   display: flex;
   gap: 12px;
@@ -383,9 +386,13 @@ footer,
 
 .stepBody {
   flex: 1;
+  min-width: 0;
+  /* FIX penting supaya flex tidak mendorong layout */
 }
 
-/* Command box */
+/* =========================
+   COMMAND BOX (scroll di dalam box)
+========================= */
 .cmd {
   margin-top: 10px;
   border: 1px solid var(--border);
@@ -393,6 +400,8 @@ footer,
   overflow: hidden;
   background: var(--soft);
   max-width: 100%;
+  min-width: 0;
+  /* FIX penting */
 }
 
 .cmdTop {
@@ -403,18 +412,7 @@ footer,
   border-bottom: 1px solid var(--border);
   font-size: 12px;
   color: var(--muted);
-}
-
-.cmd pre {
-  padding: 12px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.cmd code {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  color: var(--text);
+  min-width: 0;
 }
 
 .copy {
@@ -425,13 +423,25 @@ footer,
   border-radius: 10px;
   cursor: pointer;
   font-weight: 700;
+  flex: 0 0 auto;
 }
 
 .copy:hover {
   border-color: rgba(124, 58, 237, .45);
 }
 
-/* Notes */
+.cmd pre {
+  padding: 12px;
+  overflow-x: auto;
+  /* ini yang boleh geser */
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* =========================
+   NOTES
+========================= */
 .note {
   margin-top: 12px;
   padding: 12px;
@@ -456,12 +466,16 @@ footer,
   background: rgba(220, 38, 38, .06);
 }
 
-/* Table */
+/* =========================
+   TABLE
+========================= */
 .tableWrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--border);
   border-radius: 14px;
   margin-top: 14px;
+  min-width: 0;
 }
 
 .tbl {
@@ -489,7 +503,9 @@ footer,
   background: rgba(124, 58, 237, .04);
 }
 
-/* Tags */
+/* =========================
+   TAGS
+========================= */
 .tag {
   display: inline-block;
   font-size: 11px;
@@ -549,7 +565,9 @@ footer,
   background: rgba(148, 163, 184, .16);
 }
 
-/* Checklist */
+/* =========================
+   CHECKLIST
+========================= */
 .checklist {
   margin: 14px 0 0;
   padding: 0;
@@ -577,7 +595,9 @@ footer,
   margin-top: 2px;
 }
 
-/* FAQ */
+/* =========================
+   FAQ
+========================= */
 .faq details {
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -598,7 +618,9 @@ footer,
   line-height: 1.6;
 }
 
-/* Footer & Toast */
+/* =========================
+   FOOTER & TOAST
+========================= */
 .footer {
   margin-top: 20px;
   border-top: 1px solid var(--border);
@@ -636,6 +658,7 @@ footer,
 
 /* =========================
    CURSOR BACKLIGHT (BIG, BRIGHT, BEHIND)
+   Note: elemen #cursorGlowBack & #cursorGlowCore dibuat via JS/HTML
 ========================= */
 #cursorGlowBack,
 #cursorGlowCore {
@@ -662,7 +685,6 @@ footer,
       rgba(251, 191, 36, .22) 78%,
       transparent 84%);
   mix-blend-mode: multiply;
-  /* makes it pop on light bg */
 }
 
 #cursorGlowCore {
@@ -709,10 +731,21 @@ footer,
   }
 }
 
-/* Responsive */
-@media (max-width:760px) {
-  .grid2 {
-    grid-template-columns: 1fr;
+/* =========================
+   RESPONSIVE + MOBILE OVERFLOW FIX
+   Goal:
+   - Desktop tetap lega (wrap 1120px)
+   - Mobile: page tidak geser horizontal
+   - Tapi code block tetap bisa geser di dalam box
+========================= */
+@media (max-width:760px),
+(pointer:coarse) {
+
+  /* kunci halaman agar tidak “nabrak kanan” */
+  html,
+  body {
+    width: 100%;
+    overflow-x: hidden;
   }
 
   .topbar .brand {
@@ -725,81 +758,49 @@ footer,
     justify-content: flex-start;
   }
 
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+
   .logo {
     width: 56px;
     height: 56px;
     border-radius: 16px;
   }
-}
-/* =========================
-   MOBILE OVERFLOW FIX (SIMPLE MODE)
-   target: page tidak boleh ikut geser horizontal
-   ========================= */
 
-/* 1) kunci page dari horizontal scroll */
-html,
-body {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: clip;
-  /* lebih bagus dari hidden, fallback di bawah */
-}
-
-@supports not (overflow: clip) {
-
-  html,
-  body {
-    overflow-x: hidden;
+  /* FIX UTAMA: item flex/grid boleh menyusut */
+  .stepBody,
+  .cmd,
+  .cmdTop,
+  .cmd pre,
+  .kv,
+  .grid2 {
+    min-width: 0;
   }
-}
 
-/* 2) pastikan wrapper juga tidak menciptakan overflow */
-.wrap,
-.card,
-.step,
-.grid2 {
-  max-width: 100%;
-}
+  /* jangan sampai card/step memaksa lebar */
+  .card,
+  .step {
+    max-width: 100%;
+    overflow: hidden;
+  }
 
-/* 3) FIX UTAMA: flex item boleh menyusut (ini yang biasanya bikin “nabrak kanan”) */
-.stepBody,
-.cmd,
-.cmd pre,
-.tableWrap {
-  min-width: 0;
-  /* PENTING untuk flex/grid */
-}
+  /* teks panjang boleh pecah (inline), tapi code block tetap scroll */
+  code,
+  .v,
+  .k,
+  .muted,
+  .faqBody {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
 
-/* 4) kode panjang harus scroll DI DALAM box, bukan mendorong layout */
-.cmd {
-  overflow: hidden;
-}
+  /* code block tetap bisa geser dalam box */
+  .cmd pre {
+    overflow-x: auto;
+  }
 
-/* biar radius rapi */
-.cmd pre {
-  max-width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.cmd pre code {
-  white-space: pre;
-  /* jangan wrap */
-  display: inline-block;
-  /* bikin scroll width mengikuti konten */
-  min-width: 100%;
-  /* isi pendek tetap penuh */
-}
-
-/* 5) kadang yang bikin overflow itu elemen yang “kepanjangan” (tag, link, code inline) */
-code,
-.v,
-.kv {
-  overflow-wrap: anywhere;
-}
-
-/* 6) khusus iOS: cegah zoom/geser aneh di input */
-input,
-button {
-  max-width: 100%;
+  .cmd pre code {
+    min-width: max-content;
+  }
 }
