@@ -1,20 +1,36 @@
-/* style.css */
+/* style.css (clean, no duplicates) */
+
+/* =========================
+   THEME TOKENS
+========================= */
 :root {
+  /* base */
   --bg: #f7f8fb;
   --card: #ffffff;
   --text: #0f172a;
   --muted: #475569;
   --border: #e2e8f0;
   --soft: #f1f5f9;
-  --accent: #2563eb;
-  --accent2: #06b6d4;
-  --ok: #16a34a;
-  --warn: #f59e0b;
-  --danger: #dc2626;
-  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --shadow: 0 10px 30px rgba(15, 23, 42, .08);
   --radius: 16px;
+
   --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+
+  /* colorful accents */
+  --accent: #7c3aed;
+  /* purple */
+  --accent2: #22d3ee;
+  /* cyan */
+  --accent3: #fb7185;
+  /* pink */
+  --accent4: #fbbf24;
+  /* amber */
+
+  /* glow helpers */
+  --glowA: rgba(124, 58, 237, .22);
+  --glowB: rgba(34, 211, 238, .20);
+  --glowC: rgba(251, 113, 133, .14);
 }
 
 [data-theme="dark"] {
@@ -24,11 +40,17 @@
   --muted: #9ca3af;
   --border: #1f2937;
   --soft: #0b1324;
-  --accent: #60a5fa;
-  --accent2: #22d3ee;
-  --shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --shadow: 0 12px 40px rgba(0, 0, 0, .35);
+
+  /* dark glow can be slightly stronger */
+  --glowA: rgba(124, 58, 237, .28);
+  --glowB: rgba(34, 211, 238, .22);
+  --glowC: rgba(251, 113, 133, .18);
 }
 
+/* =========================
+   RESET / BASE
+========================= */
 * {
   box-sizing: border-box;
 }
@@ -36,10 +58,12 @@
 body {
   margin: 0;
   font-family: var(--sans);
-  background: radial-gradient(1200px 600px at 20% 0%, rgba(37, 99, 235, .10), transparent 60%),
-    radial-gradient(1200px 600px at 80% 0%, rgba(6, 182, 212, .10), transparent 60%),
-    var(--bg);
   color: var(--text);
+  background:
+    radial-gradient(1000px 550px at 12% -10%, var(--glowA), transparent 60%),
+    radial-gradient(900px 520px at 85% -5%, var(--glowB), transparent 60%),
+    radial-gradient(760px 520px at 60% 12%, var(--glowC), transparent 60%),
+    var(--bg);
 }
 
 code {
@@ -55,40 +79,105 @@ pre code {
   white-space: pre;
 }
 
+/* Pastikan konten selalu di atas backlight */
+header,
+main,
+footer,
+.topbar,
+.wrap {
+  position: relative;
+  z-index: 20;
+}
+
+/* =========================
+   TOPBAR (FREEZE)
+========================= */
 .topbar {
   position: sticky;
   top: 0;
-  z-index: 20;
-  background: rgba(255, 255, 255, .75);
+  z-index: 1000;
+  background: rgba(255, 255, 255, .72);
   border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
 }
 
 [data-theme="dark"] .topbar {
-  background: rgba(11, 18, 32, .7);
+  background: rgba(11, 18, 32, .68);
 }
 
+/* Layout bar */
 .topbar .brand {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 14px 16px;
   max-width: 1120px;
   margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
   justify-content: space-between;
+  gap: 16px;
 }
 
+.brandLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brandMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Logo besar */
 .logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--accent2), var(--accent));
-  box-shadow: var(--shadow);
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  background: var(--card);
+  box-shadow:
+    0 18px 44px rgba(15, 23, 42, .14),
+    0 0 0 6px rgba(124, 58, 237, .10),
+    0 0 0 12px rgba(34, 211, 238, .06);
+  transform: translateZ(0);
 }
 
-.title {
-  font-weight: 800;
+/* Title + loop animation */
+.heroTitle {
+  font-size: 18px;
+  font-weight: 900;
   letter-spacing: .2px;
+  line-height: 1.1;
+  display: inline-block;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3), var(--accent));
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: titleShine 6s linear infinite, titleFloat 3.6s ease-in-out infinite;
+}
+
+@keyframes titleShine {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes titleFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2px);
+  }
 }
 
 .subtitle {
@@ -97,40 +186,48 @@ pre code {
   margin-top: 2px;
 }
 
+/* Theme button area (taruh di bawah logo lewat HTML structure) */
+.themeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.themeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  background: linear-gradient(180deg, rgba(124, 58, 237, .10), rgba(34, 211, 238, .08));
+  box-shadow: 0 10px 26px rgba(15, 23, 42, .08);
+  cursor: pointer;
+}
+
+.themeBtn:hover {
+  border-color: rgba(124, 58, 237, .45);
+}
+
+.themeDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  box-shadow: 0 0 0 6px rgba(34, 211, 238, .10);
+}
+
+/* Right side actions */
 .actions {
   display: flex;
-  gap: 10px;
   align-items: center;
+  gap: 10px;
 }
 
-.pill {
-  font-size: 12px;
-  padding: 8px 10px;
-  border-radius: 999px;
-  background: var(--soft);
-  border: 1px solid var(--border);
-  color: var(--muted);
-}
-
-.btn {
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text);
-  padding: 9px 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, .06);
-}
-
-.btn:hover {
-  border-color: rgba(37, 99, 235, .45);
-}
-
-.btn.ghost {
-  box-shadow: none;
-  background: transparent;
-}
-
+/* =========================
+   LAYOUT
+========================= */
 .wrap {
   max-width: 1120px;
   margin: 18px auto 40px;
@@ -191,10 +288,13 @@ pre code {
 }
 
 .search input:focus {
-  border-color: rgba(37, 99, 235, .55);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
+  border-color: rgba(124, 58, 237, .45);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, .12);
 }
 
+/* =========================
+   CARD / PANELS
+========================= */
 .card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -209,14 +309,14 @@ pre code {
   font-size: 18px;
 }
 
+.cardHead p {
+  margin: 6px 0 0;
+}
+
 .muted {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.5;
-}
-
-.cardHead p {
-  margin: 6px 0 0;
 }
 
 .grid2 {
@@ -226,28 +326,11 @@ pre code {
   margin-top: 14px;
 }
 
-@media (max-width: 760px) {
-  .grid2 {
-    grid-template-columns: 1fr;
-  }
-
-  .topbar .brand {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-}
-
 .kv {
   padding: 12px;
   border: 1px dashed var(--border);
   border-radius: 14px;
-  background: linear-gradient(180deg, rgba(37, 99, 235, .06), transparent);
+  background: linear-gradient(180deg, rgba(124, 58, 237, .06), transparent);
 }
 
 .k {
@@ -268,13 +351,14 @@ pre code {
   display: block;
 }
 
+/* Steps */
 .step {
   display: flex;
   gap: 12px;
   padding: 12px;
   border-radius: 14px;
   border: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(6, 182, 212, .06), transparent);
+  background: linear-gradient(180deg, rgba(34, 211, 238, .06), transparent);
   margin-top: 12px;
 }
 
@@ -298,6 +382,7 @@ pre code {
   flex: 1;
 }
 
+/* Command box */
 .cmd {
   margin-top: 10px;
   border: 1px solid var(--border);
@@ -316,20 +401,6 @@ pre code {
   color: var(--muted);
 }
 
-.copy {
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text);
-  padding: 6px 10px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.copy:hover {
-  border-color: rgba(37, 99, 235, .45);
-}
-
 .cmd pre {
   padding: 12px;
   overflow-x: auto;
@@ -341,6 +412,21 @@ pre code {
   color: var(--text);
 }
 
+.copy {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.copy:hover {
+  border-color: rgba(124, 58, 237, .45);
+}
+
+/* Notes */
 .note {
   margin-top: 12px;
   padding: 12px;
@@ -365,6 +451,7 @@ pre code {
   background: rgba(220, 38, 38, .06);
 }
 
+/* Table */
 .tableWrap {
   overflow-x: auto;
   border: 1px solid var(--border);
@@ -388,15 +475,16 @@ pre code {
 
 .tbl th {
   text-align: left;
-  background: linear-gradient(180deg, rgba(37, 99, 235, .08), transparent);
+  background: linear-gradient(180deg, rgba(124, 58, 237, .10), transparent);
   color: var(--muted);
   font-weight: 800;
 }
 
 .tbl tbody tr:hover {
-  background: rgba(37, 99, 235, .04);
+  background: rgba(124, 58, 237, .04);
 }
 
+/* Tags */
 .tag {
   display: inline-block;
   font-size: 11px;
@@ -410,52 +498,53 @@ pre code {
 
 .tag.ui {
   color: #155e75;
-  border-color: rgba(6, 182, 212, .35);
-  background: rgba(6, 182, 212, .08);
+  border-color: rgba(34, 211, 238, .35);
+  background: rgba(34, 211, 238, .10);
 }
 
 .tag.api {
   color: #1d4ed8;
-  border-color: rgba(37, 99, 235, .35);
-  background: rgba(37, 99, 235, .08);
+  border-color: rgba(124, 58, 237, .30);
+  background: rgba(124, 58, 237, .10);
 }
 
 .tag.be {
   color: #166534;
   border-color: rgba(22, 163, 74, .35);
-  background: rgba(22, 163, 74, .08);
+  background: rgba(22, 163, 74, .10);
 }
 
 .tag.db {
   color: #7c2d12;
   border-color: rgba(245, 158, 11, .35);
-  background: rgba(245, 158, 11, .08);
+  background: rgba(245, 158, 11, .10);
 }
 
 .tag.cache {
   color: #4338ca;
   border-color: rgba(99, 102, 241, .35);
-  background: rgba(99, 102, 241, .08);
+  background: rgba(99, 102, 241, .10);
 }
 
 .tag.mqtt {
   color: #92400e;
   border-color: rgba(251, 191, 36, .35);
-  background: rgba(251, 191, 36, .10);
+  background: rgba(251, 191, 36, .12);
 }
 
 .tag.wk {
   color: #7f1d1d;
   border-color: rgba(220, 38, 38, .25);
-  background: rgba(220, 38, 38, .06);
+  background: rgba(220, 38, 38, .08);
 }
 
 .tag.aux {
   color: #374151;
-  border-color: rgba(148, 163, 184, .6);
-  background: rgba(148, 163, 184, .15);
+  border-color: rgba(148, 163, 184, .60);
+  background: rgba(148, 163, 184, .16);
 }
 
+/* Checklist */
 .checklist {
   margin: 14px 0 0;
   padding: 0;
@@ -483,6 +572,7 @@ pre code {
   margin-top: 2px;
 }
 
+/* FAQ */
 .faq details {
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -503,6 +593,7 @@ pre code {
   line-height: 1.6;
 }
 
+/* Footer & Toast */
 .footer {
   margin-top: 20px;
   border-top: 1px solid var(--border);
@@ -530,6 +621,7 @@ pre code {
   transform: translateY(10px);
   transition: .18s ease;
   pointer-events: none;
+  z-index: 1200;
 }
 
 .toast.show {
@@ -537,214 +629,87 @@ pre code {
   transform: translateY(0);
 }
 
-.logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  object-fit: cover;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-  background: var(--card);
-}
-
-/* ====== COLORFUL UPGRADE ====== */
-:root {
-  --accent: #7c3aed;
-  /* purple */
-  --accent2: #22d3ee;
-  /* cyan */
-  --accent3: #fb7185;
-  /* pink */
-  --accent4: #fbbf24;
-  /* amber */
-  --glow: rgba(124, 58, 237, .22);
-  --glow2: rgba(34, 211, 238, .18);
-}
-
-/* background lebih hidup */
-body {
-  background:
-    radial-gradient(1000px 550px at 12% -10%, rgba(124, 58, 237, .22), transparent 60%),
-    radial-gradient(900px 520px at 85% -5%, rgba(34, 211, 238, .20), transparent 60%),
-    radial-gradient(760px 520px at 60% 12%, rgba(251, 113, 133, .14), transparent 60%),
-    var(--bg);
-}
-
-/* Topbar: lebih rapi */
-.topbar {
-  background: rgba(255, 255, 255, .72);
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(14px);
-}
-
-[data-theme="dark"] .topbar {
-  background: rgba(11, 18, 32, .68);
-}
-
-.topbar .brand {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.brandLeft {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.brandMeta {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-/* LOGO diperbesar */
-.logo {
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
-  object-fit: cover;
-  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-  box-shadow:
-    0 18px 44px rgba(15, 23, 42, .14),
-    0 0 0 6px rgba(124, 58, 237, .10),
-    0 0 0 12px rgba(34, 211, 238, .06);
-  background: var(--card);
-  transform: translateZ(0);
-}
-
-/* Judul: animasi loop (shine + floating) */
-.heroTitle {
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: .2px;
-  line-height: 1.1;
-  position: relative;
-  display: inline-block;
-  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3), var(--accent));
-  background-size: 220% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: titleShine 6s linear infinite, titleFloat 3.6s ease-in-out infinite;
-}
-
-@keyframes titleShine {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  100% {
-    background-position: 200% 50%;
-  }
-}
-
-@keyframes titleFloat {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-2px);
-  }
-}
-
-.subtitle {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-/* Theme button di bawah logo */
-.themeRow {
-  margin-top: 2px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.themeBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(124, 58, 237, .10), rgba(34, 211, 238, .08));
-  box-shadow: 0 10px 26px rgba(15, 23, 42, .08);
-}
-
-.themeBtn:hover {
-  border-color: rgba(124, 58, 237, .45);
-}
-
-.themeDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, var(--accent2), var(--accent));
-  box-shadow: 0 0 0 6px rgba(34, 211, 238, .10);
-}
-
-/* actions kanan jadi minimal */
-.actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-#quickHint {
-  max-width: 460px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  background: linear-gradient(180deg, rgba(251, 191, 36, .10), rgba(251, 113, 133, .06));
-}
-
-/* kecilkan shadow tombol umum biar bersih */
-.btn {
-  box-shadow: 0 8px 22px rgba(15, 23, 42, .08);
-}
-
-/* ==== CURSOR GLOW ==== */
-#cursorGlow {
+/* =========================
+   CURSOR BACKLIGHT (BIG, BRIGHT, BEHIND)
+========================= */
+#cursorGlowBack,
+#cursorGlowCore {
   position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 60;
-  width: 28px;
-  height: 28px;
+  left: 0;
+  top: 0;
   border-radius: 999px;
+  pointer-events: none;
   transform: translate(-50%, -50%);
   opacity: 0;
-  mix-blend-mode: screen;
-  background: radial-gradient(circle at center,
-      rgba(34, 211, 238, .55),
-      rgba(124, 58, 237, .24) 40%,
-      rgba(251, 113, 133, .12) 70%,
-      transparent 75%);
-  filter: blur(0px);
   transition: opacity .18s ease;
 }
 
-/* “backlight” lebih besar di dark mode */
-[data-theme="dark"] #cursorGlow {
-  mix-blend-mode: lighten;
+#cursorGlowBack {
+  width: 620px;
+  height: 620px;
+  z-index: 6;
+  /* behind content, above bg */
+  filter: blur(26px);
   background: radial-gradient(circle at center,
-      rgba(34, 211, 238, .60),
-      rgba(124, 58, 237, .28) 40%,
-      rgba(251, 113, 133, .18) 70%,
-      transparent 78%);
+      rgba(34, 211, 238, .62) 0%,
+      rgba(124, 58, 237, .42) 38%,
+      rgba(251, 113, 133, .30) 62%,
+      rgba(251, 191, 36, .22) 78%,
+      transparent 84%);
+  mix-blend-mode: multiply;
+  /* makes it pop on light bg */
 }
 
-/* responsif */
-@media (max-width: 760px) {
+#cursorGlowCore {
+  width: 170px;
+  height: 170px;
+  z-index: 7;
+  filter: blur(2px);
+  background: radial-gradient(circle at center,
+      rgba(34, 211, 238, .95) 0%,
+      rgba(124, 58, 237, .62) 42%,
+      rgba(251, 113, 133, .25) 72%,
+      transparent 78%);
+  mix-blend-mode: screen;
+}
+
+[data-theme="dark"] #cursorGlowBack {
+  mix-blend-mode: lighten;
+  filter: blur(30px);
+  background: radial-gradient(circle at center,
+      rgba(34, 211, 238, .45) 0%,
+      rgba(124, 58, 237, .36) 42%,
+      rgba(251, 113, 133, .24) 70%,
+      transparent 84%);
+}
+
+[data-theme="dark"] #cursorGlowCore {
+  mix-blend-mode: lighten;
+  background: radial-gradient(circle at center,
+      rgba(34, 211, 238, .88) 0%,
+      rgba(124, 58, 237, .60) 46%,
+      rgba(251, 113, 133, .22) 76%,
+      transparent 82%);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .heroTitle {
+    animation: none;
+  }
+
+  #cursorGlowBack,
+  #cursorGlowCore {
+    transition: none;
+  }
+}
+
+/* Responsive */
+@media (max-width:760px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+
   .topbar .brand {
     flex-direction: column;
     align-items: flex-start;
@@ -755,108 +720,9 @@ body {
     justify-content: flex-start;
   }
 
-  #quickHint {
-    max-width: 100%;
-  }
-
   .logo {
     width: 56px;
     height: 56px;
     border-radius: 16px;
-  }
-}
-
-/* ===== Cursor Backlight (bigger + brighter, but behind content) ===== */
-
-/* Pastikan konten selalu di atas glow */
-.topbar,
-.wrap,
-main,
-header,
-footer {
-  position: relative;
-  z-index: 20;
-}
-
-/* Backlight layer: besar, lembut, di belakang */
-#cursorGlowBack {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 520px;
-  height: 520px;
-  border-radius: 999px;
-  pointer-events: none;
-  z-index: 5;
-  /* di belakang konten */
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  filter: blur(22px);
-  transition: opacity .18s ease;
-
-  /* Tema terang: lebih “nyala” */
-  background: radial-gradient(circle at center,
-      rgba(34, 211, 238, .55) 0%,
-      rgba(124, 58, 237, .35) 38%,
-      rgba(251, 113, 133, .25) 62%,
-      rgba(251, 191, 36, .18) 78%,
-      transparent 82%);
-  mix-blend-mode: multiply;
-  /* aman untuk terang, glow terasa menyatu */
-}
-
-/* Core layer: kecil, tajam, tetap di belakang konten juga */
-#cursorGlowCore {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 140px;
-  height: 140px;
-  border-radius: 999px;
-  pointer-events: none;
-  z-index: 6;
-  /* masih di belakang teks */
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  filter: blur(2px);
-  transition: opacity .18s ease;
-
-  background: radial-gradient(circle at center,
-      rgba(34, 211, 238, .92) 0%,
-      rgba(124, 58, 237, .55) 40%,
-      rgba(251, 113, 133, .22) 70%,
-      transparent 74%);
-  mix-blend-mode: screen;
-  /* bikin core terlihat “glow” */
-}
-
-/* Dark mode: lebih kuat, lebih “neon” */
-[data-theme="dark"] #cursorGlowBack {
-  opacity: 0;
-  /* tetap dikontrol JS, ini cuma memastikan tone */
-  mix-blend-mode: lighten;
-  background: radial-gradient(circle at center,
-      rgba(34, 211, 238, .40) 0%,
-      rgba(124, 58, 237, .32) 40%,
-      rgba(251, 113, 133, .22) 68%,
-      transparent 80%);
-  filter: blur(26px);
-}
-
-[data-theme="dark"] #cursorGlowCore {
-  mix-blend-mode: lighten;
-  background: radial-gradient(circle at center,
-      rgba(34, 211, 238, .85) 0%,
-      rgba(124, 58, 237, .55) 45%,
-      rgba(251, 113, 133, .20) 72%,
-      transparent 76%);
-}
-
-/* Optional: kurangi efek jika user pilih reduce motion */
-@media (prefers-reduced-motion: reduce) {
-
-  #cursorGlowBack,
-  #cursorGlowCore {
-    transition: none;
   }
 }
