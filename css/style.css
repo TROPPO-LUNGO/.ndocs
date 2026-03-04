@@ -536,3 +536,327 @@ pre code {
   opacity: 1;
   transform: translateY(0);
 }
+
+.logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+/* ====== COLORFUL UPGRADE ====== */
+:root {
+  --accent: #7c3aed;
+  /* purple */
+  --accent2: #22d3ee;
+  /* cyan */
+  --accent3: #fb7185;
+  /* pink */
+  --accent4: #fbbf24;
+  /* amber */
+  --glow: rgba(124, 58, 237, .22);
+  --glow2: rgba(34, 211, 238, .18);
+}
+
+/* background lebih hidup */
+body {
+  background:
+    radial-gradient(1000px 550px at 12% -10%, rgba(124, 58, 237, .22), transparent 60%),
+    radial-gradient(900px 520px at 85% -5%, rgba(34, 211, 238, .20), transparent 60%),
+    radial-gradient(760px 520px at 60% 12%, rgba(251, 113, 133, .14), transparent 60%),
+    var(--bg);
+}
+
+/* Topbar: lebih rapi */
+.topbar {
+  background: rgba(255, 255, 255, .72);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+}
+
+[data-theme="dark"] .topbar {
+  background: rgba(11, 18, 32, .68);
+}
+
+.topbar .brand {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brandLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brandMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* LOGO diperbesar */
+.logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  box-shadow:
+    0 18px 44px rgba(15, 23, 42, .14),
+    0 0 0 6px rgba(124, 58, 237, .10),
+    0 0 0 12px rgba(34, 211, 238, .06);
+  background: var(--card);
+  transform: translateZ(0);
+}
+
+/* Judul: animasi loop (shine + floating) */
+.heroTitle {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  line-height: 1.1;
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3), var(--accent));
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: titleShine 6s linear infinite, titleFloat 3.6s ease-in-out infinite;
+}
+
+@keyframes titleShine {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes titleFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Theme button di bawah logo */
+.themeRow {
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.themeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(124, 58, 237, .10), rgba(34, 211, 238, .08));
+  box-shadow: 0 10px 26px rgba(15, 23, 42, .08);
+}
+
+.themeBtn:hover {
+  border-color: rgba(124, 58, 237, .45);
+}
+
+.themeDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  box-shadow: 0 0 0 6px rgba(34, 211, 238, .10);
+}
+
+/* actions kanan jadi minimal */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#quickHint {
+  max-width: 460px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: linear-gradient(180deg, rgba(251, 191, 36, .10), rgba(251, 113, 133, .06));
+}
+
+/* kecilkan shadow tombol umum biar bersih */
+.btn {
+  box-shadow: 0 8px 22px rgba(15, 23, 42, .08);
+}
+
+/* ==== CURSOR GLOW ==== */
+#cursorGlow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  mix-blend-mode: screen;
+  background: radial-gradient(circle at center,
+      rgba(34, 211, 238, .55),
+      rgba(124, 58, 237, .24) 40%,
+      rgba(251, 113, 133, .12) 70%,
+      transparent 75%);
+  filter: blur(0px);
+  transition: opacity .18s ease;
+}
+
+/* “backlight” lebih besar di dark mode */
+[data-theme="dark"] #cursorGlow {
+  mix-blend-mode: lighten;
+  background: radial-gradient(circle at center,
+      rgba(34, 211, 238, .60),
+      rgba(124, 58, 237, .28) 40%,
+      rgba(251, 113, 133, .18) 70%,
+      transparent 78%);
+}
+
+/* responsif */
+@media (max-width: 760px) {
+  .topbar .brand {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  #quickHint {
+    max-width: 100%;
+  }
+
+  .logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+  }
+}
+
+/* ===== Cursor Backlight (bigger + brighter, but behind content) ===== */
+
+/* Pastikan konten selalu di atas glow */
+.topbar,
+.wrap,
+main,
+header,
+footer {
+  position: relative;
+  z-index: 20;
+}
+
+/* Backlight layer: besar, lembut, di belakang */
+#cursorGlowBack {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 520px;
+  height: 520px;
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 5;
+  /* di belakang konten */
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  filter: blur(22px);
+  transition: opacity .18s ease;
+
+  /* Tema terang: lebih “nyala” */
+  background: radial-gradient(circle at center,
+      rgba(34, 211, 238, .55) 0%,
+      rgba(124, 58, 237, .35) 38%,
+      rgba(251, 113, 133, .25) 62%,
+      rgba(251, 191, 36, .18) 78%,
+      transparent 82%);
+  mix-blend-mode: multiply;
+  /* aman untuk terang, glow terasa menyatu */
+}
+
+/* Core layer: kecil, tajam, tetap di belakang konten juga */
+#cursorGlowCore {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 140px;
+  height: 140px;
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 6;
+  /* masih di belakang teks */
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  filter: blur(2px);
+  transition: opacity .18s ease;
+
+  background: radial-gradient(circle at center,
+      rgba(34, 211, 238, .92) 0%,
+      rgba(124, 58, 237, .55) 40%,
+      rgba(251, 113, 133, .22) 70%,
+      transparent 74%);
+  mix-blend-mode: screen;
+  /* bikin core terlihat “glow” */
+}
+
+/* Dark mode: lebih kuat, lebih “neon” */
+[data-theme="dark"] #cursorGlowBack {
+  opacity: 0;
+  /* tetap dikontrol JS, ini cuma memastikan tone */
+  mix-blend-mode: lighten;
+  background: radial-gradient(circle at center,
+      rgba(34, 211, 238, .40) 0%,
+      rgba(124, 58, 237, .32) 40%,
+      rgba(251, 113, 133, .22) 68%,
+      transparent 80%);
+  filter: blur(26px);
+}
+
+[data-theme="dark"] #cursorGlowCore {
+  mix-blend-mode: lighten;
+  background: radial-gradient(circle at center,
+      rgba(34, 211, 238, .85) 0%,
+      rgba(124, 58, 237, .55) 45%,
+      rgba(251, 113, 133, .20) 72%,
+      transparent 76%);
+}
+
+/* Optional: kurangi efek jika user pilih reduce motion */
+@media (prefers-reduced-motion: reduce) {
+
+  #cursorGlowBack,
+  #cursorGlowCore {
+    transition: none;
+  }
+}

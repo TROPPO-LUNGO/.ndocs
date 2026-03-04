@@ -12,18 +12,32 @@
 <body>
   <header class="topbar">
     <div class="brand">
-      <div class="logo" aria-hidden="true"></div>
-      <div>
-        <div class="title">Docker Stack Ops Guide</div>
-        <div class="subtitle">Mode Simpel + Mode Komplek (RFID Tracking & Garment Backend)</div>
+      <div class="brandLeft">
+        <img class="logo" src="img/sempante.png" alt="Semvante" />
+        <div class="brandMeta">
+          <div class="title heroTitle">Docker Stack Ops Guide</div>
+          <div class="subtitle">I Have A Power, yo!</div>
+  
+          <div class="themeRow">
+            <button class="btn themeBtn" id="toggleThemeBtn" type="button" aria-label="Toggle theme">
+              <span class="themeDot" aria-hidden="true"></span>
+              <span id="themeText">Terang</span>
+            </button>
+          </div>
+        </div>
+      </div>
+  
+      <div class="actions">
+        <div class="pill" id="quickHint">
+          Tip: akses API via <code>:8000</code>, bukan langsung <code>:7000</code>
+        </div>
       </div>
     </div>
-
-    <div class="actions">
-      <div class="pill" id="stackStatusPill">Status: <span id="statusText">manual</span></div>
-      <button class="btn" id="toggleThemeBtn" type="button">Tema: Terang</button>
-    </div>
   </header>
+  
+  <!-- cursor glow element -->
+  <div id="cursorGlowBack" aria-hidden="true"></div>
+  <div id="cursorGlowCore" aria-hidden="true"></div>
 
   <main class="wrap">
     <section class="toolbar">
